@@ -1,5 +1,6 @@
 package pcb_board;
 import utils.Config;
+import utils.DataLoader;
 import utils.RandomGenerator;
 
 import javax.swing.*;
@@ -8,18 +9,70 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static utils.Config.*;
+
 public class PCBBoard {
     private final List<Path> paths;
     private final int width;
     private final int height;
+    private final FitnessData fitnessData;
 
-    public PCBBoard(List<Pair> inputs, int width, int height) {
-        this.width = width;
-        this.height = height;
-        this.paths = getPaths(inputs, this.width, this.height);
+    public PCBBoard(DataLoader dataLoader) {
+        this.width = dataLoader.getWidth();
+        this.height = dataLoader.getHeight();;
+        this.paths = createPaths(dataLoader.getPairs(), this.width, this.height);
+        this.fitnessData = calculateFitnessData(this.paths);
     }
 
-    private List<Path> getPaths(List<Pair> inputs, int width, int height){
+    public PCBBoard(PCBBoard mother, PCBBoard father){
+        if(father.getWidth() != mother.getWidth() || father.getHeight() != mother.getHeight()){
+            throw new RuntimeException("Mother and Father board must have equal dimensions!");
+        }
+
+        this.width = mother.getWidth();
+        this.height = mother.getHeight();
+        this.paths = new ArrayList<>();
+
+        for(int i = 0; i < mother.getPaths().size(); i++){
+            Path newPath;
+            if(RandomGenerator.getInt(2) % 2 == 0){
+               newPath = new Path(mother.getPaths().get(i));
+            }else{
+                newPath = new Path(father.getPaths().get(i));
+            }
+            this.paths.add(newPath);
+        }
+        this.fitnessData = calculateFitnessData(this.paths);
+    }
+
+    public FitnessData getFitnessData() {
+        return fitnessData;
+    }
+
+    public FitnessData calculateFitnessData(List<Path> paths){
+        int numberOfIntersections = 0;
+        int length = 0;
+        int numberOfSegments = 0;
+        for(int i = 0; i < paths.size(); i++) {
+            Path path1 = paths.get(i);
+            length += path1.getPointsLength();
+            numberOfSegments += path1.getSegmentsLength();
+
+            List<CustomPoint> points1 = path1.getPoints();
+            for (int j = i+1; j < paths.size(); j++) {
+                List<CustomPoint> points2 = paths.get(j).getPoints();
+                for(CustomPoint p1 : points1){
+                    for(CustomPoint p2 : points2){
+                        if(p1.equals(p2))
+                            numberOfIntersections++;
+                    }
+                }
+            }
+        }
+        return new FitnessData(length, numberOfSegments, numberOfIntersections);
+    }
+
+    private List<Path> createPaths(List<Pair> inputs, int width, int height){
         List<Path> resultPaths = new ArrayList<>();
         for(Pair p : inputs){
             resultPaths.add(new Path(p, width, height));
@@ -27,9 +80,10 @@ public class PCBBoard {
         return resultPaths;
     }
 
+
     public void draw(){
         Color frameBackgroundColor = Color.decode("#d8ebe4");
-        JFrame frame = new JFrame("PCB_Board");
+        JFrame frame = new JFrame("PCBBoard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize((width+1)* Config.GAP +200, (height+1)* Config.GAP +200);
         frame.getContentPane().setBackground(frameBackgroundColor);
@@ -40,14 +94,30 @@ public class PCBBoard {
         frame.add(board);
     }
 
+    public double getFitness(){
+        return this.fitnessData.getFitness();
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public List<Path> getPaths() {
+        return paths;
+    }
+
+    @Override
+    public String toString() {
+        return "PCBBard = " + fitnessData.toString();
+    }
+
     private class Board extends JPanel {
-        Random rand;
         private final Color basicPointColor = Color.decode("#282846");
         private final Color boardBackgroundColor = Color.decode("#007580");
-
-        public Board() {
-            this.rand = new Random();
-        }
 
         public void paintComponent(Graphics g) {
             super.paintComponent(g);

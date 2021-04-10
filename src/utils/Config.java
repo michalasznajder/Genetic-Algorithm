@@ -6,4 +6,5 @@ public class Config {
     public static final int INTERSECTION_WEIGHT = 50;
     public static final int LENGTH_WEIGHT = 3;
     public static final int SEGMENTS_WEIGHT = 1;
+    public static final int FITNESS_SCALE = 100;
 }

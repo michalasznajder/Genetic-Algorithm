@@ -1,9 +1,5 @@
 package pcb_board;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Segment {
 
     private final CustomPoint start;
@@ -12,6 +8,11 @@ public class Segment {
     public Segment(CustomPoint start, CustomPoint finish) {
         this.start = start;
         this.finish = finish;
+    }
+
+    public Segment(Segment s){
+        this.start = new CustomPoint(s.getStart());
+        this.finish = new CustomPoint(s.getFinish());
     }
 
     public CustomPoint getStart() {

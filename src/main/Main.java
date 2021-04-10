@@ -6,9 +6,13 @@ import java.io.IOException;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        DataLoader zad0 = new DataLoader("zad1.txt");
-        PCBBoard board0 = new PCBBoard(zad0.getPairs(), zad0.getWidth(), zad0.getHeight());
-        board0.draw();
+        DataLoader zad0 = new DataLoader("zad0.txt");
+        for(int i = 0; i < 1; i++){
+            PCBBoard board0 = new PCBBoard(zad0);
+            board0.draw();
+            System.out.println(board0.toString()) ;
+        }
+
 
     }
 }

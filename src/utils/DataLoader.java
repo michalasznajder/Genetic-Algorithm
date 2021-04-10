@@ -12,9 +12,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DataLoader{
-    public List<Pair> pairs;
-    public int width;
-    public int height;
+    private final List<Pair> pairs;
+    private int width;
+    private int height;
 
     public DataLoader(String filename) throws IOException {
         this.pairs = new ArrayList<>();

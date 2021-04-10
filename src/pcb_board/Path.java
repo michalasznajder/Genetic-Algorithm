@@ -2,18 +2,44 @@ package pcb_board;
 
 import utils.RandomGenerator;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Path {
+    private CustomPoint start;
+    private CustomPoint finish;
     private List<Segment> segments;
     private List<CustomPoint> points;
 
     public Path(Pair pair, int width, int height) {
+        this.start = new CustomPoint(pair.getStart());
+        this.finish = new CustomPoint(pair.getFinish());
         this.points = getPointsList(pair, width, height);
         this.segments = getSegmentsList(this.points);
+    }
+
+    public Path(Path p){
+        this.start = new CustomPoint(p.getStart());
+        this.finish = new CustomPoint(p.getFinish());
+        this.points = clonePoints(p.getPoints());
+        this.segments = cloneSegments(p.getSegments());
+    }
+
+    private List<CustomPoint> clonePoints(List<CustomPoint> points){
+        List<CustomPoint> resultPoints = new ArrayList<>();
+        for(CustomPoint p : points){
+            resultPoints.add(new CustomPoint(p));
+        }
+        return resultPoints;
+    }
+
+    private List<Segment> cloneSegments(List<Segment> segments){
+        List<Segment> resultSegments = new ArrayList<>();
+        for(Segment s : segments){
+            resultSegments.add(new Segment(s));
+        }
+        return resultSegments;
     }
 
     private List<CustomPoint> getPointsList(Pair pair, int width, int height){
@@ -50,8 +76,7 @@ public class Path {
 
     private List<Segment> getSegmentsList(List<CustomPoint> points){
         if(points.size() < 2){
-            System.out.println("points path consists of less than 2 points!");
-            return null;
+            throw new RuntimeException("points path consists of less than 2 points!");
         }
         List<Segment> resultSegments = new ArrayList<>();
         CustomPoint beforeCurve;
@@ -147,6 +172,14 @@ public class Path {
         }
     }
 
+    public int getPointsLength(){
+        return points.size() - 1;
+    }
+
+    public int getSegmentsLength(){
+        return segments.size();
+    }
+
     public List<Segment> getSegments() {
         return segments;
     }
@@ -161,6 +194,14 @@ public class Path {
 
     public void setPoints(List<CustomPoint> points) {
         this.points = points;
+    }
+
+    public CustomPoint getStart() {
+        return start;
+    }
+
+    public CustomPoint getFinish() {
+        return finish;
     }
 
     @Override
