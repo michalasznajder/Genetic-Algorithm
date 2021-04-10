@@ -2,18 +2,21 @@ package pcb_board;
 
 import utils.RandomGenerator;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Path {
-    private final List<Segment> segments;
+    private List<Segment> segments;
+    private List<CustomPoint> points;
 
     public Path(Pair pair, int width, int height) {
-        this.segments = getSegments(pair, width, height);
+        this.points = getPointsList(pair, width, height);
+        this.segments = getSegmentsList(this.points);
     }
 
-    private List<Segment> getSegments(Pair pair, int width, int height){
+    private List<CustomPoint> getPointsList(Pair pair, int width, int height){
         CustomPoint start = pair.getStart();
         CustomPoint finish = pair.getFinish();
 
@@ -42,10 +45,10 @@ public class Path {
             fullPath = connect(pathFromStart, pathFromEnd);
         } while(fullPath == null);
 
-        return generateSegmentsFromPoints(fullPath);
+        return fullPath;
     }
 
-    private List<Segment> generateSegmentsFromPoints(List<CustomPoint> points){
+    private List<Segment> getSegmentsList(List<CustomPoint> points){
         if(points.size() < 2){
             System.out.println("points path consists of less than 2 points!");
             return null;
@@ -146,6 +149,18 @@ public class Path {
 
     public List<Segment> getSegments() {
         return segments;
+    }
+
+    public void setSegments(List<Segment> segments) {
+        this.segments = segments;
+    }
+
+    public List<CustomPoint> getPoints() {
+        return points;
+    }
+
+    public void setPoints(List<CustomPoint> points) {
+        this.points = points;
     }
 
     @Override

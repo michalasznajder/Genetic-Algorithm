@@ -2,8 +2,6 @@ package utils;
 
 import pcb_board.CustomPoint;
 import pcb_board.Pair;
-
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;

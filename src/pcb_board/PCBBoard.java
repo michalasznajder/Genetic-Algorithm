@@ -9,12 +9,9 @@ import java.util.List;
 import java.util.Random;
 
 public class PCBBoard {
-//    values
     private final List<Path> paths;
     private final int width;
     private final int height;
-
-
 
     public PCBBoard(List<Pair> inputs, int width, int height) {
         this.width = width;
@@ -30,21 +27,14 @@ public class PCBBoard {
         return resultPaths;
     }
 
-
-
-
-
     public void draw(){
-//        draw a frame
         Color frameBackgroundColor = Color.decode("#d8ebe4");
-
         JFrame frame = new JFrame("PCB_Board");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize((width+1)* Config.GAP +200, (height+1)* Config.GAP +200);
         frame.getContentPane().setBackground(frameBackgroundColor);
         frame.setLayout(null);
         frame.setVisible(true);
-//        add the board
         Board board = new Board();
         board.setBounds(50,50, (width+1)* Config.GAP + Config.POINT_SIZE, (height+1)* Config.GAP + Config.POINT_SIZE);
         frame.add(board);
