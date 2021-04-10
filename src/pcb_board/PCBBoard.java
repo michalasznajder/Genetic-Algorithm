@@ -7,21 +7,34 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import static utils.Config.*;
 
 public class PCBBoard {
     private final List<Path> paths;
     private final int width;
     private final int height;
     private final FitnessData fitnessData;
+    private boolean breedOnly;
 
     public PCBBoard(DataLoader dataLoader) {
         this.width = dataLoader.getWidth();
         this.height = dataLoader.getHeight();;
         this.paths = createPaths(dataLoader.getPairs(), this.width, this.height);
         this.fitnessData = calculateFitnessData(this.paths);
+        this.setBreedOnly(false);
+    }
+
+    public PCBBoard(PCBBoard p){
+        this.width = p.getWidth();
+        this.height = p.getHeight();
+        List<Path> paths = new ArrayList<>();
+        List<Path> pathsToClone = p.getPaths();
+        for(Path path : pathsToClone){
+            paths.add(new Path(path));
+        }
+        this.paths = paths;
+        this.fitnessData = calculateFitnessData(this.paths);
+        this.setBreedOnly(false);
     }
 
     public PCBBoard(PCBBoard mother, PCBBoard father){
@@ -35,14 +48,16 @@ public class PCBBoard {
 
         for(int i = 0; i < mother.getPaths().size(); i++){
             Path newPath;
-            if(RandomGenerator.getInt(2) % 2 == 0){
-               newPath = new Path(mother.getPaths().get(i));
+            if(RandomGenerator.getInt(2) == 0){
+                newPath = new Path(mother.getPaths().get(i));
             }else{
                 newPath = new Path(father.getPaths().get(i));
             }
             this.paths.add(newPath);
         }
         this.fitnessData = calculateFitnessData(this.paths);
+        this.setBreedOnly(false);
+
     }
 
     public FitnessData getFitnessData() {
@@ -112,7 +127,15 @@ public class PCBBoard {
 
     @Override
     public String toString() {
-        return "PCBBard = " + fitnessData.toString();
+        return "PCBBard = " + fitnessData.toString() + "\n";
+    }
+
+    public boolean isBreedOnly() {
+        return breedOnly;
+    }
+
+    public void setBreedOnly(boolean breedOnly) {
+        this.breedOnly = breedOnly;
     }
 
     private class Board extends JPanel {

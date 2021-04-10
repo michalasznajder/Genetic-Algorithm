@@ -9,65 +9,104 @@ import java.util.List;
 
 public class Evolution {
 
-    private Population population;
+    private final Population population;
     private final int tournamentSize;
     private final int crossoverRate;
     private final int mutationRate;
+    private SelectionMethod selectionMethod;
 
-
-    public Evolution(DataLoader dataLoader, int populationSize, int tournamentSize, int crossoverRate, int mutationRate) {
+    public Evolution(DataLoader dataLoader, int populationSize, int tournamentSize, int crossoverRate, int mutationRate, SelectionMethod selectionMethod) {
         this.tournamentSize = tournamentSize;
         this.crossoverRate = crossoverRate;
         this.mutationRate = mutationRate;
         this.population = new Population(dataLoader, populationSize);
+        this.selectionMethod = selectionMethod;
+    }
+
+    public void evolve(int numberOfGenerations){
+        if(selectionMethod == SelectionMethod.TOURNAMENT){
+            for(int i = 0; i < numberOfGenerations; i++){
+                System.out.println(this.population.toString());
+                evolveThroughTournament();
+            }
+            population.getIndividuals().get(0).draw();
+        }
+        if (selectionMethod == SelectionMethod.ROULETTE_WHEEL) {
+//            TODO roulette wheel selection
+            return;
+        }
     }
 
     public void evolveThroughTournament(){
-
+        this.population.setIndividuals(createNewGenerationThroughTournament());
+        this.population.makeNotBreedOnly();
     }
 
-    private List<PCBBoard> createNewGenerationThroughTournament(Population population, int tournamentSize, int crossoverRate, int mutationRate){
+    private List<PCBBoard> createNewGenerationThroughTournament(){
         List<PCBBoard> newGeneration = new ArrayList<>();
-        while(newGeneration.size() < population.getSize()){
+        while(newGeneration.size() < this.population.getSize()){
             PCBBoard mother;
             PCBBoard father;
             do {
-                mother = pickIndividualThroughTournament(population, tournamentSize);
-                father = pickIndividualThroughTournament(population, tournamentSize);
+                mother = pickIndividualThroughTournament(this.population);
+                father = pickIndividualThroughTournament(this.population);
             }while(mother == father);
 
-            PCBBoard firstBorn;
-            PCBBoard secondBorn;
+            if(RandomGenerator.getInt(100) < this.crossoverRate){
+                PCBBoard firstBorn = new PCBBoard(mother, father);
+                PCBBoard secondBorn = new PCBBoard(father, mother);
 
+                mutate(firstBorn);
+                mutate(secondBorn);
 
-//            if(RandomGenerator.getInt(100) < crossoverRate){
-//                firstBorn = new PCBBoard(mother, father);
-//                secondBorn = new PCBBoard(father, mother);
-//            }else{
-//                firstBorn = new PCBBoard(mother);
-//                secondBorn = new PCBBoard(father);
-//            }
-//            if(rand.nextInt() % 100 < mutationRate){
-////                firstBorn.mutate();
-////                secondBorn.mutate();
-//            }
-//
-//            if(newGeneration.size() + 1 == size){
-//                newGeneration.add(firstBorn);
-//            }else{
-//                newGeneration.add(firstBorn);
-//                newGeneration.add(secondBorn);
-//            }
+                if(newGeneration.size() + 1 == this.population.getSize()){
+                    newGeneration.add(firstBorn);
+                    continue;
+                }
+                newGeneration.add(firstBorn);
+                newGeneration.add(secondBorn);
+            }else{
+                if(mother.isBreedOnly() && father.isBreedOnly()){
+                    continue;
+                }
+                if(mother.isBreedOnly()){
+                    mutate(father);
+                    father.setBreedOnly(true);
+                    newGeneration.add(father);
+
+                }else if(father.isBreedOnly()){
+                    mutate(mother);
+                    mother.setBreedOnly(true);
+                    newGeneration.add(mother);
+
+                }else {
+                    mutate(mother);
+                    mutate(father);
+//  change for creating new individual
+                    mother.setBreedOnly(true);
+                    newGeneration.add(mother);
+                    father.setBreedOnly(true);
+                    newGeneration.add(father);
+                }
+            }
+
         }
         return newGeneration;
     }
 
 
-    private PCBBoard pickIndividualThroughTournament(Population population, int tournamentSize){
+    private void mutate(PCBBoard individual){
+        if(RandomGenerator.getInt(100) < this.mutationRate) {
+            return;
+        }
+        return;
+    }
+
+    private PCBBoard pickIndividualThroughTournament(Population population){
         PCBBoard winner;
         List<PCBBoard> individuals = population.getIndividuals();
         List<PCBBoard> participants = new ArrayList<>();
-        for(int i = 0; i < tournamentSize; i++){
+        for(int i = 0; i < this.tournamentSize; i++){
             int index = RandomGenerator.getInt(individuals.size());
             PCBBoard randomIndividual = individuals.get(index);
             if(!(participants.contains(randomIndividual))){
@@ -96,7 +135,10 @@ public class Evolution {
             }
         }
         winner = participants.get(0);
-        individuals.remove(winner);
         return winner;
+    }
+
+    public Population getPopulation() {
+        return population;
     }
 }
