@@ -7,23 +7,74 @@ import java.util.Collections;
 import java.util.List;
 
 public class Path {
-    private CustomPoint start;
-    private CustomPoint finish;
+    private final CustomPoint start;
+    private final CustomPoint finish;
     private List<Segment> segments;
     private List<CustomPoint> points;
+    private final int width;
+    private final int height;
 
     public Path(Pair pair, int width, int height) {
         this.start = new CustomPoint(pair.getStart());
         this.finish = new CustomPoint(pair.getFinish());
-        this.points = getPointsList(pair, width, height);
+        this.width = width;
+        this.height = height;
+        this.points = getPointsList(this.start, this.finish, width, height);
         this.segments = getSegmentsList(this.points);
     }
 
     public Path(Path p){
         this.start = new CustomPoint(p.getStart());
         this.finish = new CustomPoint(p.getFinish());
+        this.width = p.getWidth();
+        this.height = p.getHeight();
         this.points = clonePoints(p.getPoints());
-        this.segments = cloneSegments(p.getSegments());
+        this.segments = getSegmentsList(this.points);
+    }
+
+    public void mutate2(){
+        this.points = getPointsList(this.start, this.finish, width, height);
+        this.segments = getSegmentsList(this.points);
+    }
+
+    public void mutate(){
+        int segmentIndex = RandomGenerator.getInt(segments.size());
+        Segment mutationSegment = segments.get(segmentIndex);
+        CustomPoint mutationSegmentStart = mutationSegment.getStart();
+        CustomPoint mutationSegmentFinish = mutationSegment.getFinish();
+
+
+        int mutationStartIndex = points.indexOf(mutationSegmentStart);
+        int mutationFinishIndex = points.indexOf(mutationSegmentFinish);
+
+        int firstPointIndex;
+        int secondPointIndex;
+
+        CustomPoint mutationPointStart;
+        CustomPoint mutationPointEnd;
+        int i = 0;
+        do{
+//            if(mutationFinishIndex)
+            firstPointIndex = RandomGenerator.getInt(mutationFinishIndex - mutationStartIndex + 1) + mutationStartIndex;
+            secondPointIndex = RandomGenerator.getInt(mutationFinishIndex - mutationStartIndex + 1) + mutationStartIndex;
+            i++;
+        }while(firstPointIndex == secondPointIndex);
+
+        if(firstPointIndex > secondPointIndex){
+            int temp = firstPointIndex;
+            firstPointIndex = secondPointIndex;
+            secondPointIndex = temp;
+        }
+
+        mutationPointStart = points.get(firstPointIndex);
+        mutationPointEnd = points.get(secondPointIndex);
+
+        List<CustomPoint> newPoints = getPointsList(mutationPointStart, mutationPointEnd, this.width, this.height);
+        List<CustomPoint> pointsToChange = this.points.subList(points.indexOf(mutationPointStart), points.indexOf(mutationPointEnd)+1);
+
+        this.points.removeAll(pointsToChange);
+        this.points.addAll(firstPointIndex, newPoints);
+        this.segments = getSegmentsList(this.points);
     }
 
     private List<CustomPoint> clonePoints(List<CustomPoint> points){
@@ -34,18 +85,29 @@ public class Path {
         return resultPoints;
     }
 
-    private List<Segment> cloneSegments(List<Segment> segments){
-        List<Segment> resultSegments = new ArrayList<>();
-        for(Segment s : segments){
-            resultSegments.add(new Segment(s));
-        }
-        return resultSegments;
+    private List<CustomPoint> getMutatedPointsList(CustomPoint start, CustomPoint finish, int width, int height){
+        List<CustomPoint> pathFromStart = new ArrayList<>();
+        List<CustomPoint> fullPath;
+        pathFromStart.add(start);
+        do {
+            CustomPoint nextStart;
+            if(pathFromStart.size() >= 2){
+                nextStart = getNextPoint(pathFromStart.get(pathFromStart.size() - 2), start, width, height);
+            }else{
+                nextStart = getNextPoint(null, start,  width, height);
+            }
+
+            addPoints(pathFromStart, start, nextStart);
+
+            start = nextStart;
+
+            fullPath = connectMutated(pathFromStart, finish);
+        } while(fullPath == null);
+
+        return fullPath;
     }
 
-    private List<CustomPoint> getPointsList(Pair pair, int width, int height){
-        CustomPoint start = pair.getStart();
-        CustomPoint finish = pair.getFinish();
-
+    private List<CustomPoint> getPointsList(CustomPoint start, CustomPoint finish, int width, int height){
         List<CustomPoint> pathFromStart = new ArrayList<>();
         List<CustomPoint> pathFromEnd = new ArrayList<>();
         List<CustomPoint> fullPath;
@@ -124,12 +186,23 @@ public class Path {
         }
     }
 
+    private List<CustomPoint> connectMutated(List<CustomPoint> pathFromStart, CustomPoint end){
+        for(int i = 0; i < pathFromStart.size(); i++){
+            CustomPoint p1 = pathFromStart.get(i);
+            if (p1.isEqual(end)) {
+                List<CustomPoint> resultPath = new ArrayList<>(pathFromStart.subList(0, i + 1));
+                return resultPath;
+            }
+        }
+        return null;
+    }
+
     private List<CustomPoint> connect(List<CustomPoint> pathFromStart, List<CustomPoint> pathFromEnd){
         for(int i = 0; i < pathFromStart.size(); i++){
             CustomPoint p1 = pathFromStart.get(i);
             for(int j = 0; j < pathFromEnd.size(); j++){
                 CustomPoint p2 = pathFromEnd.get(j);
-                if (p1.equals(p2)) {
+                if (p1.isEqual(p2)) {
                     List<CustomPoint> resultPath = new ArrayList<>(pathFromStart.subList(0, i + 1));
                     List<CustomPoint> rest = pathFromEnd.subList(0, j);
                     Collections.reverse(rest);
@@ -207,10 +280,23 @@ public class Path {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
+        result.append("Points:\n");
+        for(CustomPoint p : points){
+            result.append(p.toString()).append(" => ");
+        }
+        result.append("Segments:\n");
         for(Segment s : segments){
             result.append(s.toString()).append(" => ");
         }
-        result.append("finish");
+        result.append("finish\n");
         return result.toString();
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 }

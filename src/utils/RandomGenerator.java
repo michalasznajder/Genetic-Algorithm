@@ -7,4 +7,8 @@ public class RandomGenerator {
     public static int getInt(int bound){
         return rand.nextInt(bound);
     }
+    public static double getDouble(double bound){
+        return bound * rand.nextDouble();
+
+    }
 }

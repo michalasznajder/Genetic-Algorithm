@@ -10,11 +10,6 @@ public class Segment {
         this.finish = finish;
     }
 
-    public Segment(Segment s){
-        this.start = new CustomPoint(s.getStart());
-        this.finish = new CustomPoint(s.getFinish());
-    }
-
     public CustomPoint getStart() {
         return start;
     }

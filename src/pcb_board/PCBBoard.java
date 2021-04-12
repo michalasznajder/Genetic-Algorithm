@@ -13,7 +13,7 @@ public class PCBBoard {
     private final List<Path> paths;
     private final int width;
     private final int height;
-    private final FitnessData fitnessData;
+    private FitnessData fitnessData;
     private boolean breedOnly;
 
     public PCBBoard(DataLoader dataLoader) {
@@ -60,8 +60,22 @@ public class PCBBoard {
 
     }
 
+    public void mutate(){
+        for(Path p : this.paths){
+            p.mutate();
+        }
+        this.fitnessData = calculateFitnessData(this.paths);
+    }
+
     public FitnessData getFitnessData() {
         return fitnessData;
+    }
+
+    public PCBBoard(List<Path> paths, int width, int height){
+        this.width = width;
+        this.height = height;
+        this.paths = paths;
+        this.fitnessData = calculateFitnessData(this.paths);
     }
 
     public FitnessData calculateFitnessData(List<Path> paths){
@@ -78,7 +92,7 @@ public class PCBBoard {
                 List<CustomPoint> points2 = paths.get(j).getPoints();
                 for(CustomPoint p1 : points1){
                     for(CustomPoint p2 : points2){
-                        if(p1.equals(p2))
+                        if(p1.isEqual(p2))
                             numberOfIntersections++;
                     }
                 }
@@ -127,7 +141,7 @@ public class PCBBoard {
 
     @Override
     public String toString() {
-        return "PCBBard = " + fitnessData.toString() + "\n";
+        return "PCBBard = " + fitnessData.toString();
     }
 
     public boolean isBreedOnly() {

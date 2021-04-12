@@ -23,8 +23,7 @@ public class CustomPoint {
         return y;
     }
 
-    @Override
-    public boolean equals(Object o) {
+    public boolean isEqual(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CustomPoint point = (CustomPoint) o;

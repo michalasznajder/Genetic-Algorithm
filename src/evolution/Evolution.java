@@ -23,33 +23,44 @@ public class Evolution {
         this.selectionMethod = selectionMethod;
     }
 
-    public void evolve(int numberOfGenerations){
-        if(selectionMethod == SelectionMethod.TOURNAMENT){
-            for(int i = 0; i < numberOfGenerations; i++){
-                System.out.println(this.population.toString());
-                evolveThroughTournament();
+    public void evolve(){
+
+        int i = 0;
+        while(getBest().getFitnessData().getNumberOfIntersections() > 3){
+            this.population.setIndividuals(createNewGeneration());
+            this.population.makeNotBreedOnly();
+            i++;
+            System.out.println(i);
+            System.out.print(getBest().toString());
+
+        }
+    }
+
+
+    public PCBBoard getBest(){
+        PCBBoard best = this.population.getIndividuals().get(0);
+        for(PCBBoard pcb : this.population.getIndividuals()){
+            if(pcb.getFitness() > best.getFitness()){
+                best = pcb;
             }
-            population.getIndividuals().get(0).draw();
         }
-        if (selectionMethod == SelectionMethod.ROULETTE_WHEEL) {
-//            TODO roulette wheel selection
-            return;
-        }
+        return best;
     }
 
-    public void evolveThroughTournament(){
-        this.population.setIndividuals(createNewGenerationThroughTournament());
-        this.population.makeNotBreedOnly();
-    }
-
-    private List<PCBBoard> createNewGenerationThroughTournament(){
+    private List<PCBBoard> createNewGeneration(){
         List<PCBBoard> newGeneration = new ArrayList<>();
         while(newGeneration.size() < this.population.getSize()){
             PCBBoard mother;
             PCBBoard father;
             do {
-                mother = pickIndividualThroughTournament(this.population);
-                father = pickIndividualThroughTournament(this.population);
+                if(this.selectionMethod == SelectionMethod.TOURNAMENT){
+                    mother = pickIndividualThroughTournament(this.population);
+                    father = pickIndividualThroughTournament(this.population);
+                }else{
+                    mother = pickIndividualThroughRoulette(this.population);
+                    father = pickIndividualThroughRoulette(this.population);
+                }
+
             }while(mother == father);
 
             if(RandomGenerator.getInt(100) < this.crossoverRate){
@@ -94,12 +105,10 @@ public class Evolution {
         return newGeneration;
     }
 
-
     private void mutate(PCBBoard individual){
         if(RandomGenerator.getInt(100) < this.mutationRate) {
-            return;
+            individual.mutate();
         }
-        return;
     }
 
     private PCBBoard pickIndividualThroughTournament(Population population){
@@ -137,6 +146,31 @@ public class Evolution {
         winner = participants.get(0);
         return winner;
     }
+
+    private PCBBoard pickIndividualThroughRoulette(Population population){
+        PCBBoard winner;
+        List<PCBBoard> individuals = population.getIndividuals();
+        double totalFitness = 0;
+        List<Double> roulette = new ArrayList<>();
+        roulette.add(individuals.get(0).getFitness());
+        for(int i = 1; i < individuals.size(); i++){
+            roulette.add(individuals.get(i).getFitness() + roulette.get(i-1));
+        }
+        double shot = RandomGenerator.getDouble(roulette.get(roulette.size()-1));
+        for(int i = 0; i < individuals.size(); i++){
+            if(i == 0){
+                if(shot <= roulette.get(0)){
+                    return individuals.get(0);
+                }
+            }
+            if(shot <= roulette.get(i) && shot > roulette.get(i-1)){
+                return individuals.get(i);
+            }
+        }
+
+        throw new RuntimeException("roulette hasn't picked anyone");
+    }
+
 
     public Population getPopulation() {
         return population;
