@@ -61,9 +61,8 @@ public class PCBBoard {
     }
 
     public void mutate(){
-        for(Path p : this.paths){
-            p.mutate();
-        }
+        int mutationIndex = RandomGenerator.getInt(paths.size());
+        paths.get(mutationIndex).mutate();
         this.fitnessData = calculateFitnessData(this.paths);
     }
 

@@ -27,17 +27,18 @@ public class Evolution {
     public void evolve(int iterations){
         int i = 0;
         List<Double> fitnesses = new ArrayList<>();
-        while(i < iterations){
+        while(getBest().getFitnessData().getNumberOfIntersections() > 0){
             this.population.setIndividuals(createNewGeneration());
             this.population.makeNotBreedOnly();
             i++;
             fitnesses.add(getBest().getFitness());
 //            System.out.println(i);
 //            System.out.print(getBest().toString());
+            getBest().draw();
+
         }
         ChartDrawer.setGenerations(i);
         ChartDrawer.setFitness(fitnesses);
-        getBest().draw();
     }
 
 
@@ -56,6 +57,7 @@ public class Evolution {
         while(newGeneration.size() < this.population.getSize()){
             PCBBoard mother;
             PCBBoard father;
+            int i = 0;
             do {
                 if(this.selectionMethod == SelectionMethod.TOURNAMENT){
                     mother = pickIndividualThroughTournament(this.population);
@@ -64,7 +66,10 @@ public class Evolution {
                     mother = pickIndividualThroughRoulette(this.population);
                     father = pickIndividualThroughRoulette(this.population);
                 }
-
+                i++;
+                if(i > 100){
+                    System.out.println();
+                }
             }while(mother == father);
 
             if(RandomGenerator.getInt(100) < this.crossoverRate){

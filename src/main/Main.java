@@ -23,8 +23,8 @@ public class Main {
 
         long startTime = System.currentTimeMillis();
 
-        Evolution evolution = new Evolution(zad0, 1000, 4, 95, 10, SelectionMethod.ROULETTE_WHEEL);
-        evolution.evolve(100);
+        Evolution evolution = new Evolution(zad0, 1000, 16, 80, 50, SelectionMethod.TOURNAMENT);
+        evolution.evolve(500);
 
         long endTime =System.currentTimeMillis();
         long timeElapsed = endTime - startTime;
