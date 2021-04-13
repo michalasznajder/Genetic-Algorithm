@@ -1,6 +1,7 @@
 package evolution;
 
 import pcb_board.PCBBoard;
+import utils.ChartDrawer;
 import utils.DataLoader;
 import utils.RandomGenerator;
 
@@ -23,17 +24,20 @@ public class Evolution {
         this.selectionMethod = selectionMethod;
     }
 
-    public void evolve(){
-
+    public void evolve(int iterations){
         int i = 0;
-        while(getBest().getFitnessData().getNumberOfIntersections() > 3){
+        List<Double> fitnesses = new ArrayList<>();
+        while(i < iterations){
             this.population.setIndividuals(createNewGeneration());
             this.population.makeNotBreedOnly();
             i++;
-            System.out.println(i);
-            System.out.print(getBest().toString());
-
+            fitnesses.add(getBest().getFitness());
+//            System.out.println(i);
+//            System.out.print(getBest().toString());
         }
+        ChartDrawer.setGenerations(i);
+        ChartDrawer.setFitness(fitnesses);
+        getBest().draw();
     }
 
 
