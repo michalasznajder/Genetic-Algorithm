@@ -24,21 +24,20 @@ public class Evolution {
         this.selectionMethod = selectionMethod;
     }
 
-    public void evolve(int iterations){
+    public double evolve(int iterations){
         int i = 0;
         List<Double> fitnesses = new ArrayList<>();
-        while(getBest().getFitnessData().getNumberOfIntersections() > 0){
+        while(i < iterations){
             this.population.setIndividuals(createNewGeneration());
             this.population.makeNotBreedOnly();
             i++;
             fitnesses.add(getBest().getFitness());
 //            System.out.println(i);
-//            System.out.print(getBest().toString());
-            getBest().draw();
 
         }
-        ChartDrawer.setGenerations(i);
-        ChartDrawer.setFitness(fitnesses);
+//        getBest().draw();
+        return getBest().getFitness();
+
     }
 
 
