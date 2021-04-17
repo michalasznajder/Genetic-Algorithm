@@ -25,17 +25,24 @@ public class Evolution {
     }
 
     public double evolve(int iterations){
+        long startTime = System.currentTimeMillis();
+        long timeElapsed = 0;
+
         int i = 0;
-        List<Double> fitnesses = new ArrayList<>();
+        List<Double> finesses = new ArrayList<>();
         while(i < iterations){
             this.population.setIndividuals(createNewGeneration());
             this.population.makeNotBreedOnly();
             i++;
-            fitnesses.add(getBest().getFitness());
+            finesses.add(getBest().getFitness());
 //            System.out.println(i);
+            long endTime = System.currentTimeMillis();
+            timeElapsed = endTime - startTime;
 
         }
-//        getBest().draw();
+        getBest().draw();
+        ChartDrawer.setGenerations(i);
+        ChartDrawer.setFitness(finesses);
         return getBest().getFitness();
 
     }
